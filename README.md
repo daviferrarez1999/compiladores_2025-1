@@ -1,5 +1,4 @@
 <h1 align="center"> Linguagem C- </h1>
-![Linguagem C-](generated-image.png)
 
 # Repositório dedicado à disciplina de Compiladores do CEFET-MG Leopoldina, no semestre 2025/1. 
 
