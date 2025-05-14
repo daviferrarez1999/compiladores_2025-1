@@ -8,7 +8,7 @@
 
 # Recursos utilizados:
  - IDE: Visual Studio Code
- - Linguagem: C
+ - Linguagem: C++
 
 
 # Como compilar no Linux:
