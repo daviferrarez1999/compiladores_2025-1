@@ -1,4 +1,6 @@
-//p ler o arquivo no terminal: Se tiver no output, saia "cd .." e em seguida digite .\output\analisador.exe arquivo.txt
+// Compiladores 2025.1 - Analisador Léxico
+
+// Para ler o arquivo no terminal: Se tiver no output, saia "cd .." e em seguida digite .\output\analisador.exe arquivo.txt
 // Bibliotecas padrão da linguagem C usadas no programa
 #include <stdio.h>   // Para entrada e saída (ex: printf, fopen)
 #include <stdlib.h>  // Para funções utilitárias (ex: exit)
