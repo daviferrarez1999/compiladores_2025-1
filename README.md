@@ -18,4 +18,4 @@ Digite no terminal:
 
 # Observações sobre o código
  - A função strupr(), que converte uma string de letras minúsculas para maiúsculas, só funciona no Windows
- - Para o código rodar no Linux, pode-se usar a função toupper(), que converte caractere por caractere (preciso desabilitar a strupr() e habilitar a estrutura for com a toupper()
+ - Para que o código rode também no Linux, foi criada a função strupr_linux()
