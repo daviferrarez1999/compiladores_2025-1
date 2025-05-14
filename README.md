@@ -16,6 +16,6 @@ Digite no terminal:
  - gcc analisador.c
  - ./a.out arquivo.txt
 
-# Observações sobre o código
+# Observações sobre o código:
  - A função strupr(), que converte uma string de letras minúsculas para maiúsculas, só funciona no Windows
  - Para que o código rode também no Linux, foi criada a função strupr_linux()
