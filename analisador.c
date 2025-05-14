@@ -1,133 +1,166 @@
 // Compiladores 2025.1 - Analisador Léxico
 
-// Para ler o arquivo no terminal: Se tiver no output, saia "cd .." e em seguida digite .\output\analisador.exe arquivo.txt
-// Bibliotecas padrão da linguagem C usadas no programa
-#include <stdio.h>   // Para entrada e saída (ex: printf, fopen)
-#include <stdlib.h>  // Para funções utilitárias (ex: exit)
-#include <ctype.h>   // Para funções de verificação de caracteres (ex: isalpha, isdigit)
-#include <string.h>  // Para manipulação de strings (ex: strcmp)
+// analisador_lexico.cpp
+// Compilar com: g++ -o analisador analisador_lexico.cpp
+// Executar com: ./analisador arquivo.txt
 
-// Define o tamanho máximo que um token pode ter
+#include <iostream>     // Para entrada e saída (cout, cerr)
+#include <fstream>      // Para manipulação de arquivos (ifstream)
+#include <cctype>       // Para funções de verificação de caracteres (isalpha, isdigit, etc.)
+#include <string>       // Para manipulação de strings
+#include <vector>       // Para lista de palavras reservadas
+#include <algorithm>    // Para transform
+
+using namespace std;    // Para evitar usar std:: a cada chamada
+
+// Define o tamanho máximo de um token (mantido por clareza, embora não seja necessário com string)
 #define TAM_TOKEN 100
 
-// Lista com todas as palavras reservadas da linguagem C–
-// Essas palavras são reconhecidas como comandos específicos, não como identificadores
-const char* palavras_reservadas[] = {
+// Lista de palavras reservadas da linguagem
+const vector<string> palavras_reservadas = {
     "if", "else", "while", "break", "print", "readln", "return",
     "int", "float", "char", "bool", "true", "false"
 };
 
-// Quantidade total de palavras reservadas na lista
-int total_palavras = 13;
-
-// Função que verifica se uma string (palavra) é uma palavra reservada
-int is_palavra_reservada(const char* palavra) {
-    for (int i = 0; i < total_palavras; i++) {
-        // Compara a palavra recebida com cada palavra reservada da lista
-        if (strcmp(palavras_reservadas[i], palavra) == 0) {
-            return 1; // É palavra reservada
-        }
+// Função que verifica se uma palavra é reservada
+bool is_palavra_reservada(const string& palavra) {
+    for (const auto& reservada : palavras_reservadas) {
+        if (palavra == reservada)
+            return true;
     }
-    return 0; // Não é palavra reservada
+    return false;
 }
 
-// Função principal que faz a análise léxica do arquivo
-void analisar(FILE* arquivo) {
-    char c;                    // Armazena o caractere lido
-    char token[TAM_TOKEN];     // Vetor para armazenar o token em construção
-    int i;                     // Índice auxiliar
+// Função que transforma uma string para maiúsculas (estilo Linux/portável)
+string strupr_linux(string str) {
+    transform(str.begin(), str.end(), str.begin(), ::toupper);
+    return str;
+}
 
-    // Lê o arquivo caractere por caractere até o fim
-    while ((c = fgetc(arquivo)) != EOF) { 
-        // Ignora espaços, tabs e quebras de linha (não são tokens)
+// Função que realiza a análise léxica
+void analisar(ifstream& arquivo) {
+    char c;         // Caractere atual
+    string token;   // Token em construção
+
+    while (arquivo.get(c)) {
+        // Ignora espaços, tabs e quebras de linha
         if (isspace(c)) continue;
 
-        // Se o caractere é uma letra ou underline (_), pode ser um identificador ou palavra reservada
-        if (isalpha(c) || c == '_') {  //isalpha -> verifica se é letra
-            i = 0;
-            token[i++] = c;
+        // Identificadores ou palavras reservadas (começam com letra ou '_')
+        if (isalpha(c) || c == '_') {
+            token = c;
 
-            // Continua lendo enquanto forem letras, números ou underline
-            while (isalnum(c = fgetc(arquivo)) || c == '_') {  //isalnum -> verifica se é letra ou número
-                token[i++] = c;
+            while (arquivo.get(c) && (isalnum(c) || c == '_')) {
+                token += c;
             }
 
-            token[i] = '\0';       // Finaliza a string. \0 é o caractere nulo que indica o fim da string
-            ungetc(c, arquivo);    // Devolve o último caractere lido (não faz parte do token). 
+            if (arquivo) arquivo.unget(); // Devolve o último caractere lido se não for parte do token
 
-            // Verifica se o token é uma palavra reservada
             if (is_palavra_reservada(token)) {
-                // Converte para maiúsculas (ex: if → IF) e imprime
-                printf("%s\n", strupr(token));  // ⚠️ Só funciona no Windows!
+                cout << strupr_linux(token) << "\n";
             } else {
-                // Senão, é um identificador comum (ex: x, soma)
-                printf("ID.%s\n", token);
+                cout << "ID." << token << "\n";
             }
         }
 
-        // Se o caractere é um dígito, trata como número inteiro
-        else if (isdigit(c)) { //isdgit -> verifica se é dígito
-            i = 0;
-            token[i++] = c;
+        // Números inteiros
+        else if (isdigit(c)) {
+            token = c;
 
-            // Continua lendo enquanto forem dígitos
-            while (isdigit(c = fgetc(arquivo))) {
-                token[i++] = c;
+            while (arquivo.get(c) && isdigit(c)) {
+                token += c;
             }
 
-            token[i] = '\0';       // Finaliza a string
-            ungetc(c, arquivo);    // Devolve o caractere que não pertence ao número
+            if (arquivo) arquivo.unget(); // Devolve o caractere que não faz parte do número
 
-            printf("NUM.%s\n", token); // Imprime o número encontrado
+            cout << "NUM." << token << "\n";
         }
 
-        // Tratamento dos símbolos individuais (operadores e pontuação)
+        // Símbolos e operadores
         else {
             switch (c) {
-                case '(': printf("LPARENT\n"); break;     // Parêntese esquerdo
-                case ')': printf("RPARENT\n"); break;     // Parêntese direito
-                case '{': printf("LBRACE\n"); break;      // Chave esquerda
-                case '}': printf("RBRACE\n"); break;      // Chave direita
-                case ';': printf("SEMICOLON\n"); break;   // Ponto e vírgula
-                case ',': printf("COMMA\n"); break;       // Vírgula
-                case '=': printf("ASSIGN\n"); break;      // Sinal de atribuição
-                case '+': printf("PLUS\n"); break;        // Operador de soma
-                case '-': printf("MINUS\n"); break;       // Operador de subtração
-                case '*': printf("MULT\n"); break;        // Operador de multiplicação
-                case '/': printf("DIV\n"); break;         // Operador de divisão
-                case '<': printf("LT\n"); break;          // Menor que
-                case '>': printf("GT\n"); break;          // Maior que
+                case '(': cout << "LPARENT\n"; break;
+                case ')': cout << "RPARENT\n"; break;
+                case '{': cout << "LBRACE\n"; break;
+                case '}': cout << "RBRACE\n"; break;
+                case ';': cout << "SEMICOLON\n"; break;
+                case ',': cout << "COMMA\n"; break;
+                case '=':
+                    if (arquivo.get(c) && c == '=') {
+                        cout << "EQ\n";  // EQ para "equal", ou use "EQUALS" se preferir
+                    } else {
+                        if (arquivo) arquivo.unget(); // devolve o caractere se não for '='
+                        cout << "ASSIGN\n";
+                    }
+                    break;
 
-                // Se não for nenhum dos reconhecidos, imprime erro
+                case '+': 
+                    if (arquivo.get(c) && c == '+') {
+                        cout << "TWOPLUS\n";  // EQ para "equal", ou use "EQUALS" se preferir
+                    } else {
+                        if (arquivo) arquivo.unget(); // devolve o caractere se não for '='
+                        cout << "PLUS\n";
+                    }
+                break;
+                case '-': 
+                    if (arquivo.get(c) && c == '-') {
+                        cout << "TWOMINUS\n";  // EQ para "equal", ou use "EQUALS" se preferir
+                    } else {
+                        if (arquivo) arquivo.unget(); // devolve o caractere se não for '='
+                        cout << "MINUS\n";
+                    }
+                    break;
+                case '*': cout << "MULT\n"; break;
+                case '/': cout << "DIV\n"; break;
+                case '<': 
+                    if (arquivo.get(c) && c == '=') {
+                        cout << "LEQ\n";  // GE = Greater or Equal
+                    } else {
+                        if (arquivo) arquivo.unget(); // devolve o caractere lido se não for '='
+                        cout << "LT\n";  // GT = Greater Than
+                    }
+                    break;
+                case '>':
+                    if (arquivo.get(c) && c == '=') {
+                        cout << "GEQ\n";  // GE = Greater or Equal
+                    } else {
+                        if (arquivo) arquivo.unget(); // devolve o caractere lido se não for '='
+                        cout << "GT\n";  // GT = Greater Than
+                    }
+                    break;
+
+
+                // Caso não seja símbolo conhecido, reporta erro
                 default:
-                    printf("ERRO: caractere inválido '%c'\n", c);
+                    cerr << "ERRO: caractere inválido '" << c << "'\n";
             }
         }
     }
 
-    // Após o fim do arquivo, imprime EOF
-    printf("EOF\n");
+    // Indica o fim do arquivo
+    cout << "EOF\n";
 }
 
-// Função principal do programa
+// Função principal
 int main(int argc, char* argv[]) {
-    // Verifica se o nome do arquivo foi passado na linha de comando
+    // Verifica se o nome do arquivo foi fornecido
     if (argc < 2) {
-        printf("Uso: %s <arquivo fonte>\n", argv[0]);
+        cerr << "Uso: " << argv[0] << " <arquivo fonte>\n";
         return 1;
     }
 
-    // Tenta abrir o arquivo para leitura
-    FILE* arquivo = fopen(argv[1], "r");
-    if (!arquivo) {
-        perror("Erro ao abrir o arquivo"); // Mensagem de erro se não conseguir abrir
+    // Abre o arquivo
+    ifstream arquivo(argv[1]);
+    if (!arquivo.is_open()) {
+        perror("Erro ao abrir o arquivo");
         return 1;
     }
 
-    // Chama a função que faz a análise léxica
+    // Chama o analisador léxico
     analisar(arquivo);
 
-    // Fecha o arquivo após análise
-    fclose(arquivo);
+    // Fecha o arquivo
+    arquivo.close();
+
     return 0;
 }
