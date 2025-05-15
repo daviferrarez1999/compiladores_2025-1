@@ -79,11 +79,11 @@ void analisar(ifstream& arquivo) {
         // Símbolos e operadores
         else {
             switch (c) {
-                case '(': cout << "LPARENT\n"; break;
-                case ')': cout << "RPARENT\n"; break;
-                case '{': cout << "LBRACE\n"; break;
-                case '}': cout << "RBRACE\n"; break;
-                case ';': cout << "SEMICOLON\n"; break;
+                case '(': cout << "LPARENT\n"; break; 
+                case ')': cout << "RPARENT\n"; break; 
+                case '{': cout << "LBRACE\n"; break; 
+                case '}': cout << "RBRACE\n"; break; 
+                case ';': cout << "SEMICOLON\n"; break; 
                 case ',': cout << "COMMA\n"; break;
                 case '=':
                     if (arquivo.get(c) && c == '=') {
@@ -96,17 +96,17 @@ void analisar(ifstream& arquivo) {
 
                 case '+': 
                     if (arquivo.get(c) && c == '+') {
-                        cout << "TWOPLUS\n";  // EQ para "equal", ou use "EQUALS" se preferir
+                        cout << "INCREMENT\n";  // incremento
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere se não for '='
+                        if (arquivo) arquivo.unget(); // devolve o caractere se não tiver mais um '+'
                         cout << "PLUS\n";
                     }
                 break;
                 case '-': 
                     if (arquivo.get(c) && c == '-') {
-                        cout << "TWOMINUS\n";  // EQ para "equal", ou use "EQUALS" se preferir
+                        cout << "DECREMENT\n";  // decremento
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere se não for '='
+                        if (arquivo) arquivo.unget(); // devolve o caractere se não tiver mais um '-'
                         cout << "MINUS\n";
                     }
                     break;
@@ -114,10 +114,10 @@ void analisar(ifstream& arquivo) {
                 case '/': cout << "DIV\n"; break;
                 case '<': 
                     if (arquivo.get(c) && c == '=') {
-                        cout << "LEQ\n";  // GE = Greater or Equal
+                        cout << "LEQ\n";  // LEQ = Less Than or Equal
                     } else {
                         if (arquivo) arquivo.unget(); // devolve o caractere lido se não for '='
-                        cout << "LT\n";  // GT = Greater Than
+                        cout << "LT\n";  // LT = Less Than
                     }
                     break;
                 case '>':
@@ -128,7 +128,24 @@ void analisar(ifstream& arquivo) {
                         cout << "GT\n";  // GT = Greater Than
                     }
                     break;
-
+                    case '|': 
+                    if (arquivo.get(c) && c == '|') {
+                        cout << "OR\n";  
+                    }
+                    break;
+                case '!':
+                    if (arquivo.get(c) && c == '=') {
+                        cout << "DIFF\n";  // DIFF  = Different
+                    } else {
+                        if (arquivo) arquivo.unget(); // devolve o caractere lido se não for '='
+                        cout << "NEG\n";  // NEG = Negacao logica 
+                    }
+                    break;
+                case '&':
+                    if (arquivo.get(c) && c == '&') {
+                        cout << "AND\n";  
+                    } 
+                    break;
 
                 // Caso não seja símbolo conhecido, reporta erro
                 default:
