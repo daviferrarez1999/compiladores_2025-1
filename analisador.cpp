@@ -85,6 +85,7 @@ void analisar(ifstream& arquivo) {
                 case '}': cout << "RBRACE\n"; break; 
                 case ';': cout << "SEMICOLON\n"; break; 
                 case ',': cout << "COMMA\n"; break;
+                case '%': cout << "MOD\n"; break; // Modulo da divisao
                 case '=':
                     if (arquivo.get(c) && c == '=') {
                         cout << "EQ\n";  // EQ para "equal", ou use "EQUALS" se preferir
