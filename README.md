@@ -10,8 +10,10 @@
  - IDE: Visual Studio Code
  - Linguagem: C++
 
-
 # Como compilar:
 Digite no terminal: 
  - g++ -o analisador analisador.cpp
  - ./analisador arquivo.txt
+
+# Testes de Erros Esperados:
+ - Foi testado a declaração de variável com caractere inválido e o erro foi reportado no terminal
