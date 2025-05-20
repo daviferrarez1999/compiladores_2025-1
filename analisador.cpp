@@ -1,20 +1,21 @@
-// Compiladores 2025.1 - Analisador Léxico
+// Compiladores 2025.1 - Analisador Lexico
 
-// analisador_lexico.cpp
+// No linux:
 // Compilar com: g++ -o analisador analisador.cpp
 // Executar com: ./analisador arquivo.txt
 
-#include <iostream>     // Para entrada e saída (cout, cerr)
-#include <fstream>      // Para manipulação de arquivos (ifstream)
-#include <cctype>       // Para funções de verificação de caracteres (isalpha, isdigit, etc.)
-#include <string>       // Para manipulação de strings
+// No windows:
+// Compilar com: g++ analisador.cpp
+// Executar com: .\a arquivo.txt
+
+#include <iostream>     // Para entrada e saida (cout, cerr)
+#include <fstream>      // Para manipulacao de arquivos (ifstream)
+#include <cctype>       // Para funcoes de verificacao de caracteres (isalpha, isdigit)
+#include <string>       // Para manipulacao de strings
 #include <vector>       // Para lista de palavras reservadas
-#include <algorithm>    // Para transform
+#include <algorithm>    // Para uso em intervalos de elementos (transform)
 
 using namespace std;    // Para evitar usar std:: a cada chamada
-
-// Define o tamanho máximo de um token (mantido por clareza, embora não seja necessário com string)
-#define TAM_TOKEN 100
 
 // Lista de palavras reservadas da linguagem
 const vector<string> palavras_reservadas = {
@@ -22,63 +23,63 @@ const vector<string> palavras_reservadas = {
     "int", "float", "char", "bool", "true", "false"
 };
 
-// Função que verifica se uma palavra é reservada
-bool is_palavra_reservada(const string& palavra) {
-    for (const auto& reservada : palavras_reservadas) {
+// Funcao que verifica se uma palavra eh reservada
+bool is_palavra_reservada(const string& palavra){
+    for (const auto& reservada : palavras_reservadas){
         if (palavra == reservada)
             return true;
     }
     return false;
 }
 
-// Função que transforma uma string para maiúsculas (estilo Linux/portável)
-string strupr_linux(string str) {
+// Funcao que transforma uma string para maiusculas (estilo Linux/portavel)
+string strupr_linux(string str){
     transform(str.begin(), str.end(), str.begin(), ::toupper);
     return str;
 }
 
-// Função que realiza a análise léxica
-void analisar(ifstream& arquivo) {
+// Funcao que realiza a analise lexica
+void analisar(ifstream& arquivo){
     char c;         // Caractere atual
-    string token;   // Token em construção
+    string token;   // Token em construcao
 
-    while (arquivo.get(c)) {
-        // Ignora espaços, tabs e quebras de linha
+    while (arquivo.get(c)){
+        // Ignora espacos, tabs e quebras de linha
         if (isspace(c)) continue;
 
-        // Identificadores ou palavras reservadas (começam com letra ou '_')
-        if (isalpha(c) || c == '_') {
+        // Identificadores ou palavras reservadas (comecam com letra ou '_')
+        if(isalpha(c) || c == '_'){
             token = c;
 
-            while (arquivo.get(c) && (isalnum(c) || c == '_')) {
+            while (arquivo.get(c) && (isalnum(c) || c == '_')){
                 token += c;
             }
 
-            if (arquivo) arquivo.unget(); // Devolve o último caractere lido se não for parte do token
+            if (arquivo) arquivo.unget(); // Devolve o ultimo caractere lido se nao for parte do token
 
-            if (is_palavra_reservada(token)) {
+            if (is_palavra_reservada(token)){
                 cout << strupr_linux(token) << "\n";
             } else {
                 cout << "ID." << token << "\n";
             }
         }
 
-        // Números inteiros
-        else if (isdigit(c)) {
+        // Numeros inteiros
+        else if (isdigit(c)){
             token = c;
 
-            while (arquivo.get(c) && isdigit(c)) {
+            while (arquivo.get(c) && isdigit(c)){
                 token += c;
             }
 
-            if (arquivo) arquivo.unget(); // Devolve o caractere que não faz parte do número
+            if (arquivo) arquivo.unget(); // Devolve o caractere que nao faz parte do numero
 
             cout << "NUM." << token << "\n";
         }
 
-        // Símbolos e operadores
-        else {
-            switch (c) {
+        // Simbolos e operadores
+        else{
+            switch (c){
                 case '(': cout << "LPARENT\n"; break; 
                 case ')': cout << "RPARENT\n"; break; 
                 case '{': cout << "LBRACE\n"; break; 
@@ -87,68 +88,68 @@ void analisar(ifstream& arquivo) {
                 case ',': cout << "COMMA\n"; break;
                 case '%': cout << "MOD\n"; break; // Modulo da divisao
                 case '=':
-                    if (arquivo.get(c) && c == '=') {
-                        cout << "EQ\n";  // EQ para "equal", ou use "EQUALS" se preferir
+                    if (arquivo.get(c) && c == '='){
+                        cout << "EQ\n";  // EQ para "equal"
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere se não for '='
+                        if (arquivo) arquivo.unget(); // Devolve o caractere se nao for '='
                         cout << "ASSIGN\n";
                     }
                     break;
 
                 case '+': 
-                    if (arquivo.get(c) && c == '+') {
-                        cout << "INCREMENT\n";  // incremento
+                    if (arquivo.get(c) && c == '+'){
+                        cout << "INCREMENT\n";  // Incremento
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere se não tiver mais um '+'
+                        if (arquivo) arquivo.unget(); // Devolve o caractere se não tiver mais um '+'
                         cout << "PLUS\n";
                     }
                 break;
                 case '-': 
-                    if (arquivo.get(c) && c == '-') {
-                        cout << "DECREMENT\n";  // decremento
+                    if (arquivo.get(c) && c == '-'){
+                        cout << "DECREMENT\n";  // Decremento
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere se não tiver mais um '-'
+                        if (arquivo) arquivo.unget(); // Devolve o caractere se não tiver mais um '-'
                         cout << "MINUS\n";
                     }
                     break;
                 case '*': cout << "MULT\n"; break;
                 case '/': cout << "DIV\n"; break;
                 case '<': 
-                    if (arquivo.get(c) && c == '=') {
+                    if (arquivo.get(c) && c == '='){
                         cout << "LEQ\n";  // LEQ = Less Than or Equal
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere lido se não for '='
+                        if (arquivo) arquivo.unget(); // Devolve o caractere lido se não for '='
                         cout << "LT\n";  // LT = Less Than
                     }
                     break;
                 case '>':
-                    if (arquivo.get(c) && c == '=') {
+                    if (arquivo.get(c) && c == '='){
                         cout << "GEQ\n";  // GE = Greater or Equal
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere lido se não for '='
+                        if (arquivo) arquivo.unget(); // Devolve o caractere lido se não for '='
                         cout << "GT\n";  // GT = Greater Than
                     }
                     break;
                     case '|': 
-                    if (arquivo.get(c) && c == '|') {
+                    if (arquivo.get(c) && c == '|'){
                         cout << "OR\n";  
                     }
                     break;
                 case '!':
-                    if (arquivo.get(c) && c == '=') {
+                    if (arquivo.get(c) && c == '='){
                         cout << "DIFF\n";  // DIFF  = Different
                     } else {
-                        if (arquivo) arquivo.unget(); // devolve o caractere lido se não for '='
+                        if (arquivo) arquivo.unget(); // Devolve o caractere lido se não for '='
                         cout << "NEG\n";  // NEG = Negacao logica 
                     }
                     break;
                 case '&':
-                    if (arquivo.get(c) && c == '&') {
+                    if (arquivo.get(c) && c == '&'){
                         cout << "AND\n";  
                     } 
                     break;
 
-                // Caso não seja símbolo conhecido, reporta erro
+                // Caso não seja simbolo conhecido, reporta erro
                 default:
                     cerr << "ERRO: caractere inválido '" << c << "'\n";
             }
@@ -160,21 +161,21 @@ void analisar(ifstream& arquivo) {
 }
 
 // Função principal
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]){
     // Verifica se o nome do arquivo foi fornecido
-    if (argc < 2) {
+    if(argc < 2){
         cerr << "Uso: " << argv[0] << " <arquivo fonte>\n";
         return 1;
     }
 
     // Abre o arquivo
     ifstream arquivo(argv[1]);
-    if (!arquivo.is_open()) {
+    if (!arquivo.is_open()){
         perror("Erro ao abrir o arquivo");
         return 1;
     }
 
-    // Chama o analisador léxico
+    // Chama o analisador lexico
     analisar(arquivo);
 
     // Fecha o arquivo
