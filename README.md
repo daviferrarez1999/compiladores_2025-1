@@ -11,9 +11,15 @@
  - Linguagem: C++
 
 # Como compilar:
+Linux:
 Digite no terminal: 
  - g++ -o analisador analisador.cpp
  - ./analisador arquivo.txt
+
+Windows:
+Digite no terminal:
+ - g+++ analisador.cpp
+ - .\a arquivo.txt
 
 # Testes de Erros Esperados:
  - Foi testado a declaração de variável com caractere inválido e o erro foi reportado no terminal
