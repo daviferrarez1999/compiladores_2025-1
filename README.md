@@ -11,14 +11,14 @@
  - Linguagem: C++
 
 # Como compilar:
-Linux:
-Digite no terminal: 
+Linux:\
+Digite no terminal:\ 
  - g++ -o analisador analisador.cpp
  - ./analisador arquivo.txt
 
-Windows:
-Digite no terminal:
- - g+++ analisador.cpp
+Windows:\
+Digite no terminal:\
+ - g++ analisador.cpp
  - .\a arquivo.txt
 
 # Testes de Erros Esperados:
