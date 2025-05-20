@@ -10,12 +10,10 @@
  - IDE: Visual Studio Code
  - Linguagem: C++
 
-
-# Como compilar no Linux:
+# Como compilar:
 Digite no terminal: 
- - gcc analisador.c
- - ./a.out arquivo.txt
+ - g++ -o analisador analisador.cpp
+ - ./analisador arquivo.txt
 
-# Observações sobre o código:
- - A função strupr(), que converte uma string de letras minúsculas para maiúsculas, só funciona no Windows
- - Para que o código rode também no Linux, foi criada a função strupr_linux()
+# Testes de Erros Esperados:
+ - Foi testado a declaração de variável com caractere inválido e o erro foi reportado no terminal
