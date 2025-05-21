@@ -21,5 +21,5 @@ Digite no terminal:
  - g++ analisador.cpp
  - .\a arquivo.txt
 
-# Testes de Erros Esperados:
- - Foi testado a declaração de variável com caractere inválido e o erro foi reportado no terminal
+# Testes de Erros:
+ - Detecta caracteres inválidos na linguagem e imprime destacado em vermelho no terminal a linha e a coluna onde ocorreu
