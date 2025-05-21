@@ -25,4 +25,6 @@ Digite no terminal:
  - Erros detectados são destacados em vermelho no terminal, junto com a linha e a coluna
  - Detecta caracteres inválidos na linguagem
  - Detecta operadores compostos incompletos ou inválidos (exceto !)
- - Detecta números zeros à esquerda inválidos
+ - Detecta números inteiros com zeros à esquerda inválidos, como por exemplo 009
+ - Detecta parte fracionária faltando em números decimais (float), como por exemplo 53.
+ - Detecta zeros à esquerda a mais do que o permitido em float, como por exemplo 00.5
