@@ -22,5 +22,7 @@ Digite no terminal:
  - .\a arquivo.txt
 
 # Testes de Erros:
- - Detecta caracteres inválidos na linguagem e imprime destacado em vermelho no terminal a linha e a coluna onde ocorreu
- - Detecta operadores compostos incompletos ou inválidos
+ - Erros detectados são destacados em vermelho no terminal, junto com a linha e a coluna
+ - Detecta caracteres inválidos na linguagem
+ - Detecta operadores compostos incompletos ou inválidos (exceto !)
+ - Detecta números zeros à esquerda inválidos
