@@ -8,22 +8,23 @@
 // Compilar com: g++ analisador.cpp
 // Executar com: .\a arquivo.txt
 
-#include <iostream>     // Para entrada e saida (cout, cerr)
-#include <fstream>      // Para manipulacao de arquivos (ifstream)
-#include <cctype>       // Para funcoes de verificacao de caracteres (isalpha, isdigit)
-#include <string>       // Para manipulacao de strings
-#include <vector>       // Para lista de palavras reservadas
-#include <algorithm>    // Para uso em intervalos de elementos (transform)
+// Bibliotecas utilizadas
+#include <iostream>     // entrada e saida (cout, cerr)
+#include <fstream>      // manipulacao de arquivos (ifstream)
+#include <cctype>       // funcoes de verificacao de caracteres (isalpha, isdigit)
+#include <string>       // manipulacao de strings
+#include <vector>       // lista de palavras reservadas
+#include <algorithm>    // uso em intervalos de elementos (transform)
 
-using namespace std;    // Para evitar usar std:: a cada chamada
+using namespace std;    // evita usar std:: a cada chamada
 
-// Lista de palavras reservadas da linguagem
+// palavras reservadas da linguagem
 const vector<string> palavras_reservadas = {
     "if", "else", "while", "break", "print", "readln", "return",
     "int", "float", "char", "bool", "true", "false"
 };
 
-// Funcao que verifica se uma palavra eh reservada
+// verifica se uma palavra eh reservada
 bool is_palavra_reservada(const string& palavra){
     for (const auto& reservada : palavras_reservadas){
         if (palavra == reservada)
@@ -32,13 +33,13 @@ bool is_palavra_reservada(const string& palavra){
     return false;
 }
 
-// Funcao que transforma uma string para maiusculas (estilo Linux/portavel)
+// transforma uma string para maiusculas (estilo Linux/portavel)
 string strupr_linux(string str){
     transform(str.begin(), str.end(), str.begin(), ::toupper);
     return str;
 }
 
-// Funcao que realiza a analise lexica
+// realiza a analise lexica
 void analisar(ifstream& arquivo){
     char c;         // Caractere atual
     string token;   // Token em construcao
@@ -52,18 +53,48 @@ void analisar(ifstream& arquivo){
             continue;
         }
 
-        // Ignora espacos, tabs e quebras de linha
+        // ignora espacos, tabs e quebras de linha
         if (isspace(c)) {
             coluna++;
             continue;
         }
 
+        // Ignorando comentários do tipo /* comentário */
+        if (c == '/') {
+            char proximo;
+            if (arquivo.get(proximo)) {
+                if (proximo == '*') {
+                    // início do comentário de bloco
+                    coluna += 2;
+                    char anterior = 0;
+                    while (arquivo.get(c)) {
+                        coluna++;
+                        if (c == '\n') {
+                            linha++;
+                            coluna = 0;
+                        }
+                        if (anterior == '*' && c == '/') {
+                            coluna++; // quando fecha comentário
+                            break; // quando sai do comentário
+                        }
+                        anterior = c;
+                    }
+                    continue; // volta ao início do loop, ignora tudo do comentário
+                } else {
+                    // quando não é comentário, é um operador de divisão normal
+                    arquivo.unget(); // Devolve o caractere lido
+                }
+            }
+        }
+
         // Identificadores ou palavras reservadas (comecam com letra ou '_')
         if(isalpha(c) || c == '_'){
             token = c;
+            coluna++; // incremento para o primeiro caractere do token
 
             while (arquivo.get(c) && (isalnum(c) || c == '_')){
                 token += c;
+                coluna++; // incremento para cada caractere seguinte
             }
 
             if (arquivo) arquivo.unget(); // Devolve o ultimo caractere lido se nao for parte do token
@@ -71,19 +102,60 @@ void analisar(ifstream& arquivo){
             if (is_palavra_reservada(token)){
                 cout << strupr_linux(token) << "\n";
             } else {
-                cout << "ID." << token << "\n";
+                    cout << "ID." << token << "\n";
             }
         }
 
         // Numeros inteiros
         else if (isdigit(c)){
             token = c;
+            coluna++;
+            bool tem_ponto = false;
+            bool erro_zero_esquerda = false;
+            int coluna_erro = coluna -1; // posição inicial do número
 
-            while (arquivo.get(c) && isdigit(c)){
-                token += c;
+            while (arquivo.get(c)){
+                if(isdigit(c)){
+                    // Verifica zero à esquerda apenas antes do primeiro dígito não-zero
+                    if (!tem_ponto && token.size() == 1 && token[0] == '0' && c != '0') {
+                        erro_zero_esquerda = true;
+                    }
+                    token += c;
+                    coluna++;
+                } else if (c == '.' && !tem_ponto) {
+                    tem_ponto = true;
+                    token += c;
+                    coluna++;
+                } else {
+                    arquivo.unget();
+                    break;
+                }
             }
+            // verificando depois da leitura dos dígitos
+            if (tem_ponto) {
+                size_t pos_ponto = token.find('.');
+                string parte_inteira = token.substr(0, pos_ponto);
+                string parte_frac = token.substr(pos_ponto + 1);
 
-            if (arquivo) arquivo.unget(); // Devolve o caractere que nao faz parte do numero
+                // Erro: parte inteira com zero à esquerda
+                if (parte_inteira.size() > 1 && parte_inteira[0] == '0') {
+                    cerr << "\033[31mEncontrado ERRO na linha " << linha << ", coluna " << coluna_erro 
+                        << ": zero à esquerda em número float '" << token << "'\033[0m\n";
+                }
+
+                // Erro: parte fracionária faltando
+                if (parte_frac.empty()) {
+                    cerr << "\033[31m Encontrado ERRO na linha " << linha << ", coluna " << (coluna - 1)
+                        << ": parte fracionária faltando após ponto decimal\033[0m\n";
+                }
+            } 
+            else {
+                // Erro: inteiro com zero à esquerda
+                if (token.size() > 1 && token[0] == '0') {
+                    cerr << "\033[31mEncontrado ERRO na linha " << linha << ", coluna " << coluna_erro
+                        << ": zero à esquerda em número inteiro '" << token << "'\033[0m\n";
+                }
+            }
 
             cout << "NUM." << token << "\n";
         }
@@ -141,9 +213,13 @@ void analisar(ifstream& arquivo){
                         cout << "GT\n";  // GT = Greater Than
                     }
                     break;
-                    case '|': 
+                case '|': 
                     if (arquivo.get(c) && c == '|'){
                         cout << "OR\n";  
+                    } else {
+                        cerr << "\033[31mEncontrado ERRO na linha " << linha << ", coluna " << coluna
+                            << ": operador '|' incompleto ou inválido\033[0m\n";
+                             if (arquivo) arquivo.unget();
                     }
                     break;
                 case '!':
@@ -158,12 +234,17 @@ void analisar(ifstream& arquivo){
                     if (arquivo.get(c) && c == '&'){
                         cout << "AND\n";  
                     } 
+                    else {
+                        cerr << "\033[31mEncontrado ERRO na linha " << linha << ", coluna " << coluna - 1
+                            << ": operador '&' incompleto ou inválido\033[0m\n";
+                        if (arquivo) arquivo.unget();
+                    }
                     break;
 
                 // Caso não seja simbolo conhecido, reporta erro
                 default:
                     cerr << "\033[31m"
-                        << "ERRO na linha " << linha << ", coluna " << coluna
+                        << "Encontrado ERRO na linha " << linha << ", coluna " << coluna
                         << ": caractere inválido '" << c << "'"
                         << "\033[0m"
                         << "'\n";
