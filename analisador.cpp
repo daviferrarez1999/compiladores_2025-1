@@ -42,10 +42,21 @@ string strupr_linux(string str){
 void analisar(ifstream& arquivo){
     char c;         // Caractere atual
     string token;   // Token em construcao
+    int linha = 1;
+    int coluna = 0;
 
     while (arquivo.get(c)){
+        if (c == '\n'){
+            linha++;
+            coluna = 0;
+            continue;
+        }
+
         // Ignora espacos, tabs e quebras de linha
-        if (isspace(c)) continue;
+        if (isspace(c)) {
+            coluna++;
+            continue;
+        }
 
         // Identificadores ou palavras reservadas (comecam com letra ou '_')
         if(isalpha(c) || c == '_'){
@@ -151,7 +162,12 @@ void analisar(ifstream& arquivo){
 
                 // Caso não seja simbolo conhecido, reporta erro
                 default:
-                    cerr << "ERRO: caractere inválido '" << c << "'\n";
+                    cerr << "\033[31m"
+                        << "ERRO na linha " << linha << ", coluna " << coluna
+                        << ": caractere inválido '" << c << "'"
+                        << "\033[0m"
+                        << "'\n";
+                    break;
             }
         }
     }
