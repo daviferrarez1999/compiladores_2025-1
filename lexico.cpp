@@ -211,7 +211,7 @@ int main(int argc, char* argv[]) {
                     string parteFracionaria = lexema.substr(posPonto + 1);
 
                     if (parteInteira.length() > 1 && parteInteira[0] == '0') {
-                        cerr << "Erro na linha " << linha << ", coluna " << inicio_lexema_coluna << ": número float com zero a esquerda: " << lexema << endl;
+                        cerr << "Erro na linha " << linha << ", coluna " << inicio_lexema_coluna << ": numero float com zero a esquerda: " << lexema << endl;
                     }
                     if (parteFracionaria.empty()) {
                         cerr << "Erro na linha " << linha << ", coluna " << inicio_lexema_coluna << ": parte fracionaria ausente depois do ponto decimal" << endl;
